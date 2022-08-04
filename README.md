@@ -1,8 +1,9 @@
-# This plugin is archived meaning it will ***NOT*** be updated.
-
-
 # [SCP-343](http://www.scp-wiki.net/scp-343)
+
+**Fork of [MrMith/SCP-343](https://github.com/MrMith/SCP-343)**
+
 This is a server plugin for [SCP:SL.](https://store.steampowered.com/app/700330/SCP_Secret_Laboratory)
+
 ## Install Instructions.
 Put SCP-343.dll under the release tab into sm_plugins folder.
 
