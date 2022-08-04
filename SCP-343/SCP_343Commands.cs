@@ -40,9 +40,9 @@ namespace SCP_343
 				{
 					if (Int32.TryParse(PlayerIDString, out int PlayerIDInt))
 					{
-						if (player.PlayerId == PlayerIDInt)
+						if (player.PlayerID == PlayerIDInt)
 						{
-							player.ChangeRole(Smod2.API.RoleType.CLASSD, true, true, true);
+							player.ChangeRole(Smod2.API.RoleType.D_CLASS, true, true, true);
 
 							SCP_343Manager _343Manager = eventLogic.Get343Manager(player);
 							_343Manager.Is343 = true;
@@ -55,7 +55,7 @@ namespace SCP_343
 
 							if (pluginOptions.SCP343_HP != -1)
 							{
-								player.HP = pluginOptions.SCP343_HP;
+								player.Health = pluginOptions.SCP343_HP;
 							}
 
 							if (player.GetUserGroup().BadgeText == null)

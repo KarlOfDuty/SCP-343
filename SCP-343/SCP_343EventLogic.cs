@@ -57,7 +57,7 @@ namespace SCP_343
 
 			foreach (Smod2.API.Player player in plugin.PluginManager.Server.GetPlayers())
 			{
-				if (player.TeamRole.Role == Smod2.API.RoleType.CLASSD)
+				if (player.PlayerRole.RoleID == Smod2.API.RoleType.D_CLASS)
 				{
 					DClassList.Add(player);
 				}
@@ -96,7 +96,7 @@ namespace SCP_343
 
 				if (_343Config.SCP343_HP != -1)
 				{
-					TheChosenOne.HP = _343Config.SCP343_HP;
+					TheChosenOne.Health = _343Config.SCP343_HP;
 				}
 				TheChosenOne.SetRank("red", "SCP-343");
 			}
@@ -172,23 +172,23 @@ namespace SCP_343
 		{
 			if (Is343(ev.Player))
 			{
-				if (ev.Attacker?.TeamRole.Team == TeamType.SCP)
+				if (ev.Attacker?.PlayerRole.Team == TeamType.SCP)
 				{
 					ev.Damage = 0;
 				}
 
-				if (_343Config.SCP343_HP == -1)
+				if (_343Config.SCP343_HP > -2.0f && _343Config.SCP343_HP < 0.0f) // Used to check equal to -1
 				{
-					if(ev.Player.HP < 1000)
+					if(ev.Player.Health < 1000)
 					{
-						ev.Player.HP += 1000; //This is a bandage patch for plugins like 008 or anything that might come in the future
+						ev.Player.Health += 1000; //This is a bandage patch for plugins like 008 or anything that might come in the future
 					}
 					ev.Damage = 0;
 				}
 
-				if (ev.DamageType == DamageType.LURE || ev.DamageType == DamageType.DECONT || ev.DamageType == DamageType.WALL || ev.DamageType == DamageType.NUKE)
+				if (ev.DamageType == DamageType.RECONTAINED || ev.DamageType == DamageType.DECONTAMINATION || ev.DamageType == DamageType.WARHEAD)
 				{
-					ev.Damage = ev.Player.HP + 100;
+					ev.Damage = ev.Player.Health + 100;
 				}
 			}
 		}
@@ -274,7 +274,7 @@ namespace SCP_343
 							_343AliveCount++;
 							///Grab the Player's UnityEngine Gameobject so we can reference SCP:SL's scripts like <see cref="ServerRoles"/>
 							UnityEngine.GameObject playerGameObject = ((UnityEngine.GameObject)player.GetGameObject());
-							if (playerGameObject?.GetComponent<ServerRoles>()?.NetworkMyText != "SCP-343" || playerGameObject?.GetComponent<ServerRoles>()?.NetworkMyColor != "red")
+							if (playerGameObject?.GetComponent<ServerRoles>()?.Network_myText != "SCP-343" || playerGameObject?.GetComponent<ServerRoles>()?.Network_myColor != "red")
 							{
 								player.HideTag(false);
 								player.SetRank("red","SCP-343");
@@ -282,7 +282,7 @@ namespace SCP_343
 							}
 						}
 					}
-					teamAliveCount[player.TeamRole.Team]++;
+					teamAliveCount[player.PlayerRole.Team]++;
 				}
 
 				
@@ -291,58 +291,58 @@ namespace SCP_343
 					//Please note, if you can avoid below you should.
 					if (teamAliveCount[Smod2.API.TeamType.SCP] == 0
 						&& teamAliveCount[Smod2.API.TeamType.CHAOS_INSURGENCY] == 0
-						&& teamAliveCount[Smod2.API.TeamType.CLASSD] == _343AliveCount
+						&& teamAliveCount[Smod2.API.TeamType.D_CLASS] == _343AliveCount
 						&& teamAliveCount[Smod2.API.TeamType.SCIENTIST] == 0)
 					{
 						Smod2.PluginManager.Manager.Server.Round.Stats.ScientistsEscaped = 1;
-						Smod2.PluginManager.Manager.Server.Round.Stats.ClassDEscaped = 0;
-						ev.Status = ROUND_END_STATUS.MTF_VICTORY;
+						Smod2.PluginManager.Manager.Server.Round.Stats.DClassEscaped = 0;
+						ev.Status = RoundEndStatus.MTF_VICTORY;
 					}//If SCPs, Chaos, ClassD and Scientists are dead then MTF win.
 					else if (teamAliveCount[Smod2.API.TeamType.SCP] == 0
-						&& teamAliveCount[Smod2.API.TeamType.CLASSD] == _343AliveCount
+						&& teamAliveCount[Smod2.API.TeamType.D_CLASS] == _343AliveCount
 						&& teamAliveCount[Smod2.API.TeamType.SCIENTIST] == 0
-						&& teamAliveCount[Smod2.API.TeamType.NINETAILFOX] == 0)
+						&& teamAliveCount[Smod2.API.TeamType.MTF] == 0)
 					{
-						Smod2.PluginManager.Manager.Server.Round.Stats.ClassDEscaped = 0;
+						Smod2.PluginManager.Manager.Server.Round.Stats.DClassEscaped = 0;
 						Smod2.PluginManager.Manager.Server.Round.Stats.ScientistsEscaped = 0;
-						ev.Status = ROUND_END_STATUS.CI_VICTORY;
+						ev.Status = RoundEndStatus.CI_VICTORY;
 					}//If SCPs, ClassD, Scientists and MTF are dead then Chaos win.
-					else if (teamAliveCount[Smod2.API.TeamType.NINETAILFOX] == 0
+					else if (teamAliveCount[Smod2.API.TeamType.MTF] == 0
 						&& teamAliveCount[Smod2.API.TeamType.CHAOS_INSURGENCY] == 0
-						&& teamAliveCount[Smod2.API.TeamType.CLASSD] == _343AliveCount
+						&& teamAliveCount[Smod2.API.TeamType.D_CLASS] == _343AliveCount
 						&& teamAliveCount[Smod2.API.TeamType.SCIENTIST] == 0)
 					{
-						Smod2.PluginManager.Manager.Server.Round.Stats.ClassDEscaped = 0;
+						Smod2.PluginManager.Manager.Server.Round.Stats.DClassEscaped = 0;
 						Smod2.PluginManager.Manager.Server.Round.Stats.ScientistsEscaped = 0;
-						ev.Status = ROUND_END_STATUS.SCP_VICTORY;
+						ev.Status = RoundEndStatus.SCP_VICTORY;
 					} //If MTF, Chaos, ClassD and Scientists are dead then SCPs win.
-					else if (teamAliveCount[Smod2.API.TeamType.NINETAILFOX] == 0
-						&& teamAliveCount[Smod2.API.TeamType.CLASSD] == _343AliveCount
+					else if (teamAliveCount[Smod2.API.TeamType.MTF] == 0
+						&& teamAliveCount[Smod2.API.TeamType.D_CLASS] == _343AliveCount
 						&& teamAliveCount[Smod2.API.TeamType.SCIENTIST] == 0)
 					{
-						Smod2.PluginManager.Manager.Server.Round.Stats.ClassDEscaped = 0;
+						Smod2.PluginManager.Manager.Server.Round.Stats.DClassEscaped = 0;
 						Smod2.PluginManager.Manager.Server.Round.Stats.ScientistsEscaped = 0;
-						ev.Status = ROUND_END_STATUS.SCP_CI_VICTORY;
+						ev.Status = RoundEndStatus.SCP_CI_VICTORY;
 					}//If MTF, ClassD and Scientists are dead then SCPS & Chaos win.
 				}
 				else
 				{
-					if (teamAliveCount[Smod2.API.TeamType.NINETAILFOX] == 0
+					if (teamAliveCount[Smod2.API.TeamType.MTF] == 0
 						&& teamAliveCount[Smod2.API.TeamType.CHAOS_INSURGENCY] == 0
-						&& teamAliveCount[Smod2.API.TeamType.CLASSD] == _343AliveCount
+						&& teamAliveCount[Smod2.API.TeamType.D_CLASS] == _343AliveCount
 						&& teamAliveCount[Smod2.API.TeamType.SCIENTIST] == 0)
 					{
-						Smod2.PluginManager.Manager.Server.Round.Stats.ClassDEscaped = 0;
+						Smod2.PluginManager.Manager.Server.Round.Stats.DClassEscaped = 0;
 						Smod2.PluginManager.Manager.Server.Round.Stats.ScientistsEscaped = 0;
-						ev.Status = ROUND_END_STATUS.SCP_VICTORY;
+						ev.Status = RoundEndStatus.SCP_VICTORY;
 					} //If MTF, Chaos, ClassD and Scientists are dead then SCPs win.
-					else if (teamAliveCount[Smod2.API.TeamType.NINETAILFOX] == 0
-						&& teamAliveCount[Smod2.API.TeamType.CLASSD] == _343AliveCount
+					else if (teamAliveCount[Smod2.API.TeamType.MTF] == 0
+						&& teamAliveCount[Smod2.API.TeamType.D_CLASS] == _343AliveCount
 						&& teamAliveCount[Smod2.API.TeamType.SCIENTIST] == 0)
 					{
-						Smod2.PluginManager.Manager.Server.Round.Stats.ClassDEscaped = 1;
+						Smod2.PluginManager.Manager.Server.Round.Stats.DClassEscaped = 1;
 						Smod2.PluginManager.Manager.Server.Round.Stats.ScientistsEscaped = 0;
-						ev.Status = ROUND_END_STATUS.SCP_CI_VICTORY;
+						ev.Status = RoundEndStatus.SCP_CI_VICTORY;
 					}//If MTF, ClassD and Scientists are dead then SCPS & Chaos win.
 				}
 			}
@@ -390,7 +390,7 @@ namespace SCP_343
 					SCP_343Manager _343Manager = Get343Manager(player);
 					_343Manager.Is343 = false;
 					player.SetRank(_343Manager.PreviousBadgeColor, _343Manager.PreviousBadgeColor);
-					player.HP = 100;
+					player.Health = 100;
 				}
 			}
 		}
@@ -436,7 +436,7 @@ namespace SCP_343
 					}
 
 					///We change the player to a default D-Class and feed the function true (so it resets items and HP) and false so it doesn't teleport them to the default spawn location.
-					ev.Player.ChangeRole(Smod2.API.RoleType.CLASSD, true, false);
+					ev.Player.ChangeRole(Smod2.API.RoleType.D_CLASS, true, false);
 
 					ev.ReturnMessage = "You're no longer SCP-343.";
 					return;
