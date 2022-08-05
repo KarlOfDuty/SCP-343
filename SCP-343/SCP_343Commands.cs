@@ -3,7 +3,6 @@ using Smod2.API;
 using Smod2.Commands;
 using System;
 using System.Text.RegularExpressions;
-using System.Collections.Generic;
 
 namespace SCP_343
 {
@@ -19,7 +18,7 @@ namespace SCP_343
 
 		public string GetCommandDescription()
 		{
-			return "This command spawns in someone as SPC-343.";
+			return "Spawns in someone as SCP-343.";
 		}
 
 		public string GetUsage()
